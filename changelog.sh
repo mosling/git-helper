@@ -9,12 +9,12 @@ if [ "$?" -ne 0 ]; then
 fi
 
 ## default parameters
-BASEPATH=$(dirname $0)
+BASEPATH=$(dirname $(realpath $0))
 SCRIPT=$BASEPATH/issues.js
 TEMPLATE=$BASEPATH/git-changelog.ejs
 HISTORY=$BASEPATH/changelog.history
-RELTAG=
-FROMTAG=
+RELTAG=""
+FROMTAG=""
 REPOPATH="."
 OPTION="no-max-parents"
 OUTFOLDER=${CHANGELOGFOLDER:-$HOME/development/changelog}
@@ -29,9 +29,11 @@ usage() {
     echo
     echo "Create changelog files for the given repository and release tag"
     echo
-    echo "Usage: $0 -r <release-tag> [-i <'JSON-object'>] [-w <output-folder>] [-f <from-release-tag>]"
+    echo "Usage: $0 [auto] -r <release-tag> [-i <'JSON-object'>] [-w <output-folder>] [-f <from-release-tag>]"
     echo "           [-o <option>] [-g <repository>] [-s <script> ] [-t <template>] [hc]"
     echo ""
+    echo " auto : auto mode, use the generated parameter without asking to change it"
+    echo "        ATTENTION: all other parameters are ignored in this case"
     echo "   -r : existing release tag for the repository"
     echo "   -p : path to the git local git repository (default ${REPOPATH})"
     echo "   -f : existing release tag uses as since part for the revision range"
@@ -41,7 +43,7 @@ usage() {
     echo "   -t : template (default = ${TEMPLATE})"
     echo "   -w : write the generated output to this folder (default ${OUTFOLDER})"
     echo "   -c : cleanup output folder (i.e. rm -f <OUTFOLDER>/*) (default ${CLEANUP})"
-    echo "   -g : repository type (github,bitbucket) to generate repository commit link"
+    echo "   -g : repository type (github,gitlab) to generate repository commit link"
     echo ""
     echo "Examples: "
     echo " changelog.sh -rHEAD -fam-1.9.1 -i'${TMPLINFO}' -w$HOME/development/changelog/am/am -p$HOME/development/dw/am/am"
@@ -261,24 +263,40 @@ getGitRepositoryParts() {
     TMPLGIT=$(echo $TMPLGITURL | cut -d'.' -f1)
 }
 
-if [ $# -eq 0 ]; then
-    echo "no options given .. start interview mode"
-    RELTAG=$(readValue "Changelog for tag (leave empty for all)   : " "")
-    if [ -n "$RELTAG" ]; then
-        FROMTAG=$(readValue "Changelog from tag (leave empty for previous) : ")
+AUTOMODE="$1"
+echo "auto is $AUTOMODE"
+if [[ $# -eq 0 ]] || [[ "$AUTOMODE" = "auto" ]]
+then
+    
+    if [ -z "$AUTOMODE" ]
+    then
+        echo "no options given .. start interview mode"
+        RELTAG=$(readValue "Changelog for tag (leave empty for all)   : " "")
+        if [ -n "$RELTAG" ]; then
+            FROMTAG=$(readValue "Changelog from tag (leave empty for previous) : ")
+        fi
     fi
+    
     TMPLROWHL="Merge branch"
+    CLEANUP="no"
     getGitRepositoryParts
     
-    TMPLGIT=$(readValue "Repository Type                           : " "$TMPLGIT")
-    TMPLGITURL=$(readValue "Repository Address                        : " "$TMPLGITURL")
-    TMPLPRJ=$(readValue "Project Name                              : " "$TMPLPRJ")
-    TMPLREPO=$(readValue "Repository Name                           : " "$TMPLREPO")
-    TMPLROWHL=$(readValue "Substring to highlight a row              : " "$TMPLROWHL")
+    if [ -z "$AUTOMODE" ]
+    then
+        TMPLGIT=$(readValue "Repository Type                           : " "$TMPLGIT")
+        TMPLGITURL=$(readValue "Repository Address                        : " "$TMPLGITURL")
+        TMPLPRJ=$(readValue "Project Name                              : " "$TMPLPRJ")
+        TMPLREPO=$(readValue "Repository Name                           : " "$TMPLREPO")
+        TMPLROWHL=$(readValue "Substring to highlight a row              : " "$TMPLROWHL")
+    fi
     OUTFOLDER=$OUTFOLDER/$TMPLPRJ/$TMPLREPO
-    OUTFOLDER=$(readValue "Output folder                             : " "$OUTFOLDER")
-    OPTION=$(readValue "Options for git log                       : " "$OPTION")
-    CLEANUP=$(readValue "Remove existing changelogs?               : " "no")
+    
+    if [ -z "$AUTOMODE" ]
+    then
+        OUTFOLDER=$(readValue "Output folder                             : " "$OUTFOLDER")
+        OPTION=$(readValue "Options for git log                       : " "$OPTION")
+        CLEANUP=$(readValue "Remove existing changelogs?               : " "$CLEANUP")
+    fi
     
     TMPLINFO='{ "project":"'$TMPLPRJ'", "repo":"'$TMPLREPO'", "rowHl": "'$TMPLROWHL'", "gittype":"'$TMPLGIT'", "giturl":"'$TMPLGITURL'" }'
     COPT=""
@@ -300,7 +318,7 @@ if [ $# -eq 0 ]; then
     echo "changelog.sh${ROPT}${FOPT}${OOPT} -i'$TMPLINFO' -w$OUTFOLDER $COPT"
     echo "-------------------------------------------------"
 else
-    while getopts ":r:f:o:w:i:p:s:t:hac" opt; do
+    while getopts ":r:f:o:w:i:p:s:t:hc" opt; do
         case $opt in
             r)
                 RELTAG=$OPTARG
