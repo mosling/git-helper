@@ -101,7 +101,8 @@
 					else { 
 					%>
 								<span style="white-space: nowrap;">
-									<a href="https://openproject.jat-gmbh.de/work_packages/<%= issue %>"><%= issue %></a>
+									<a
+										href="https://openproject.jat-gmbh.de/work_packages/<%= issue %>"><%= issue %></a>
 									<%
 					}
 						issueCount++
@@ -117,23 +118,21 @@
 						<% } %>
 						<td>
 							<%
-					if ( gitType === 'github')
+					if ( gitType === 'github' || gitType === 'gitlab' )
 					{
 					%>
 							<a href="https://<%= gitUrl %>/<%= gitProject %>/<%= gitRepo %>/commit/<%= commit.sha1 %>">
 								<%= commit.sha1.substring(0, 7) %>
 								<%
 					}
-					else (gitType === 'gitlab')
+					else
 					{
 					%>
-								<a
-									href="https://<%= gitUrl %>/<%= gitProject %>/<%= gitRepo %>/commit/<%= commit.sha1 %>">
-									<%= commit.sha1.substring(0, 7) %>
-									<%
+								<%= commit.sha1.substring(0, 7) %>
+								<%
 					}
 					%>
-								</a>
+							</a>
 						</td>
 					</tr>
 					<% }) %>
