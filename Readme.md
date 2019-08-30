@@ -1,4 +1,4 @@
-# Git Changelog
+# Changelog
 
 This script can be used to generate a set of html files for each commit with links to an optional issue management system and the commit itself.
 
@@ -21,3 +21,20 @@ Please set the base output folder for the resulting files
 
 Go to the local git repository and call ```changelog.sh```. This starts an interview process to ask all values. Normally the precomputed values from the git information matches. 
 
+# Nextversion
+
+This script ask the user for the next release version depending at the existing tag.
+
+## Usage
+
+Go to the git repository folder and type 
+
+    nextversion.sh
+
+The script guides the user to process:
+
+* check that the develop branch is active
+* request the next version number
+* do a release finish if wished
+* use signing if the global config key **user.signingkey** is set
+* push the changed **master** and **develop** branches
