@@ -8,11 +8,16 @@ if [ "$?" -ne 0 ]; then
     exit 1
 fi
 
+## get path and include helper
+BASEPATH=$(dirname "$0")
+source "${BASEPATH}/helper.sh"
+echo "executing $0 ..."
+
 ## default parameters
-BASEPATH=$(dirname $(realpath $0))
 SCRIPT=$BASEPATH/issues.js
 TEMPLATE=$BASEPATH/git-changelog.ejs
 HISTORY=$BASEPATH/changelog.history
+CHANGELOGSCRIPT=.changelog.sh
 RELTAG=""
 FROMTAG=""
 REPOPATH="."
@@ -23,8 +28,7 @@ OVERLAP=3
 
 usage() {
     if [ -n "$1" ]; then
-        echo "-------------------------------------------------------------------------------------------------"
-        echo "ERROR: $1"
+        colorbanner ${RED} $1
     fi
     echo
     echo "Create changelog files for the given repository and release tag"
@@ -264,7 +268,6 @@ getGitRepositoryParts() {
 }
 
 AUTOMODE="$1"
-echo "auto is $AUTOMODE"
 if [[ $# -eq 0 ]] || [[ "$AUTOMODE" = "auto" ]]
 then
     
@@ -288,6 +291,7 @@ then
         TMPLPRJ=$(readValue "Project Name                              : " "$TMPLPRJ")
         TMPLREPO=$(readValue "Repository Name                           : " "$TMPLREPO")
         TMPLROWHL=$(readValue "Substring to highlight a row              : " "$TMPLROWHL")
+        TMPLTRACKER=$(readValue "Issue Tracker Url (:id as placeholder)    : " "$TMPLTRACKER")
     fi
     OUTFOLDER=$OUTFOLDER/$TMPLPRJ/$TMPLREPO
     
@@ -298,7 +302,8 @@ then
         CLEANUP=$(readValue "Remove existing changelogs?               : " "$CLEANUP")
     fi
     
-    TMPLINFO='{ "project":"'$TMPLPRJ'", "repo":"'$TMPLREPO'", "rowHl": "'$TMPLROWHL'", "gittype":"'$TMPLGIT'", "giturl":"'$TMPLGITURL'" }'
+    TMPLINFO='{ "project":"'$TMPLPRJ'", "repo":"'$TMPLREPO'", "rowHl": "'$TMPLROWHL'", "gittype":"'$TMPLGIT'", "giturl":"'$TMPLGITURL'", "issueTracker":"'$TMPLTRACKER'" }'
+
     COPT=""
     ROPT=""
     if [ "yes" == "$CLEANUP" ]; then
@@ -313,10 +318,14 @@ then
     if [ -n "$OPTION" ]; then
         OOPT=" -o $OPTION"
     fi
-    echo "next time you can use the following command line:"
-    echo "-------------------------------------------------"
-    echo "changelog.sh${ROPT}${FOPT}${OOPT} -i'$TMPLINFO' -w$OUTFOLDER $COPT"
-    echo "-------------------------------------------------"
+    echo "next time you can use the created ""$CHANGELOGSCRIPT"" script"
+    echo "#!/bin/bash 
+
+echo Execute the generated script from the last call @ $(date)
+
+changelog.sh${ROPT}${FOPT}${OOPT} -i'$TMPLINFO' -w$OUTFOLDER $COPT
+" > $CHANGELOGSCRIPT
+
 else
     while getopts ":r:f:o:w:i:p:s:t:hc" opt; do
         case $opt in

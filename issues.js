@@ -1,9 +1,9 @@
 /**
- * Strip the issue number in front of the commit message, 
- * this number is used later to generate a link to the Issue Management System 
+ * Strip the issue string (i.e. UPPERCASE-17653 or #89787) from the commit message, 
+ * this number is used later to generate a link to the Issue Management System. 
  */
-const ISSUE_NUMBER = /(#\d+)/g
-const STRIP_ISSUE = /#\d+[,:]*/g
+const ISSUE_NUMBER = /([A-Z]+-|#)(\d+)/g;
+const STRIP_ISSUE = /([A-Z]+-|#)\d+[,:]*/g;
 var hasIssues = 0
 
 module.exports = function (data, callback) {

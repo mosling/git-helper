@@ -6,7 +6,8 @@
 	var gitRepo = info.repo
 	var rowHl = info.rowHl
     var gitUrl = info.giturl
-    var gitType = info.gittype
+	var gitType = info.gittype
+	var issueTracker = info.issueTracker
 %>
 
 <head>
@@ -86,31 +87,40 @@
 					{
 					%>
 							<br />
-							<%
+							<span style="white-space: nowrap;">
+								<%
 					}
-					// GitLab Work Item
+					// Now start to create a issue link based on the result from "issues.js"
 					if (issue.startsWith("#"))
 					{
-						issue = issue.substr(1);
+						// suggest a default git issue (i.e. #234)
+						var issueNumber = issue.substr(1);
 					%>
-							<span style="white-space: nowrap;">
-								<a
-									href="https://gitlab.com/jat-gmbh/software/hello-gitlab/issues/<%= issue %>"><%= issue %></a>
-								<% } 
-					// otherwise suggest a OpenProject ticket
-					else { 
+								<a target="_blank"
+									href="https://<%= gitUrl %>/<%= gitProject %>/<%= gitRepo %>/issues/<%= issueNumber %>"><%= issue %></a>
+								<%
+					} 
+					// otherwise suggest a ticket from the issue tracker id configured
+					else if (info.issueTracker) 
+					{ 
+						var issueNumber = issue.substr(issue.indexOf('-') + 1);
+						var issueUrl = issueTracker.replace(/:id/g, issueNumber)
 					%>
-								<span style="white-space: nowrap;">
-									<a
-										href="https://openproject.jat-gmbh.de/work_packages/<%= issue %>"><%= issue %></a>
-									<%
+								<a target="_blank" href="<%= issueUrl %>"><%= issue %></a>
+								<%
+					}
+					else
+					{
+					%>
+								<stong><%= issue %></stong>
+								<%
 					}
 						issueCount++
 					%>
-									<a href="./changelog-<%= issue %>.html"><i class="fa fa-info-circle"
-											aria-hidden="true"></i></a>
-								</span>
-								<%
+								<a href="./changelog-<%= issue %>.html"><i class="fa fa-info-circle"
+										aria-hidden="true"></i></a>
+							</span>
+							<%
 					})
 					}
 					%>
