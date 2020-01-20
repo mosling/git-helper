@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ## check if the app is available
 which git-release-notes &>/dev/null
 if [ "$?" -ne 0 ]; then
