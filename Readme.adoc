@@ -16,11 +16,12 @@ npm install
 npm link
 ----
 
-Please set the base output folder for the resulting files 
+Please set the base output folder for the resulting files (default is $HOME/changelog) and optional the issue tracker template (default is empty).
 
 [source,shell]
 ----
-export CHANGELOGFOLDER=<folder>
+export CHANGELOG_FOLDER=<folder>
+export CHANGELOG_ISSUE_TRACKER=<url-with-id-placeholder>
 ----
 
 == Usage

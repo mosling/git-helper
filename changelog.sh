@@ -24,7 +24,7 @@ RELTAG=""
 FROMTAG=""
 REPOPATH="."
 OPTION="no-max-parents"
-OUTFOLDER=${CHANGELOGFOLDER:-$HOME/development/changelog}
+OUTFOLDER=${CHANGELOG_FOLDER:-$HOME/changelog}
 CLEANUP="no"
 OVERLAP=3
 
@@ -283,6 +283,7 @@ then
     fi
     
     TMPLROWHL="Merge branch"
+    TMPLTRACKER=$CHANGELOG_ISSUE_TRACKER
     CLEANUP="no"
     getGitRepositoryParts
     
