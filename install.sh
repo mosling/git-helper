@@ -16,6 +16,12 @@ else
     INSTALLDIR=$(dirname $OLDBIN)
 fi
 
+# make the main script executable if not 
+if [ ! -x install.sh ]
+then
+    chmod +x install.sh
+fi
+
 colorbanner ${GREEN} "Install into directory $INSTALLDIR"
 
 installFile $BASEDIR/helper.sh $INSTALLDIR

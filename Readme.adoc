@@ -16,7 +16,21 @@ npm install
 npm link
 ----
 
-Please set the base output folder for the resulting files (default is $HOME/changelog) and optional the issue tracker template (default is empty).
+== Installation
+
+Clone this repository and install the files into a folder which can be found by the search process for executables configuration (i.e. PATH environment variable).
+
+[source,shell]
+----
+$ git clone https://github.com/mosling/git-changelog.git
+$ ./install.sh
+----
+
+The install script uses the directory if the changelog.sh was installed before and can be found or ask the user for an foldername.
+
+== Configuration
+
+Please set the base output folder for the resulting files (default is $HOME/changelog) and optional the issue tracker URL (default is empty). The issue tracker URL contains a placeholder for the issue identifier named in the commt message which is `:id`.
 
 [source,shell]
 ----
@@ -24,11 +38,19 @@ export CHANGELOG_FOLDER=<folder>
 export CHANGELOG_ISSUE_TRACKER=<url-with-id-placeholder>
 ----
 
+The given URL is used to generate the following link entry after replacing the `:id` with the current issueId.
+
+[source,html]
+----
+<a target="_blank" href="issueUrl">issueId</a>
+----
 == Usage
 
 Go to the local git repository and call ```changelog.sh```. This starts an interview process to ask all values. Normally the precomputed values from the git information matches.
 
 You can enter a issue tracker url which contains a placeholder `:id` for the issue number. The issue number itself is extracted from the commit message by searching all numbers starting with hash sign or upper case letters followed by a minus and the issue number (e.g. #678, OP-7628, ABC-987).
+
+With the first run a file `.changelog.sh` is generated, please add this to your global gitignore configuration. To rerun the process execute this file.
 
 
 
