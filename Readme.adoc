@@ -30,7 +30,7 @@ The install script uses the directory if the changelog.sh was installed before a
 
 == Configuration
 
-Please set the base output folder for the resulting files (default is $HOME/changelog) and optional the issue tracker URL (default is empty). The issue tracker URL contains a placeholder for the issue identifier named in the commt message which is `:id`.
+Please set the base output folder for the resulting files (default is $HOME/changelog) and optional the issue tracker URL (default is empty). The issue tracker URL contains a placeholder for the issue identifier named in the commt message which is `:id` (see Usage).
 
 [source,shell]
 ----
@@ -38,7 +38,7 @@ export CHANGELOG_FOLDER=<folder>
 export CHANGELOG_ISSUE_TRACKER=<url-with-id-placeholder>
 ----
 
-The given URL is used to generate the following link entry after replacing the `:id` with the current issueId.
+The given URL is used to generate the following link.
 
 [source,html]
 ----
@@ -47,6 +47,22 @@ The given URL is used to generate the following link entry after replacing the `
 == Usage
 
 Go to the local git repository and call ```changelog.sh```. This starts an interview process to ask all values. Normally the precomputed values from the git information matches.
+
+----
+$ changelog.sh
+executing /c/development/bin/changelog.sh ...
+no options given .. start interview mode
+Changelog for tag (leave empty for all)   :
+Repository Type                           : github
+Repository Address                        : github.com
+Project Name                              : mosling
+Repository Name                           : git-changelog
+Substring to highlight a row              : Merge branch
+Issue Tracker Url (:id as placeholder)    : https://openproject.mosling.de/work_packages/:id
+Output folder                             : /c/development/changelog/mosling/git-changelog
+Options for git log                       : no-max-parents
+Remove existing changelogs?               : no
+----
 
 You can enter a issue tracker url which contains a placeholder `:id` for the issue number. The issue number itself is extracted from the commit message by searching all numbers starting with hash sign or upper case letters followed by a minus and the issue number (e.g. #678, OP-7628, ABC-987).
 
