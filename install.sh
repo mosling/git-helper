@@ -1,6 +1,7 @@
 #!/bin/bash
 
 BASEDIR=$(dirname "$0")
+# shellcheck source=./helper.sh
 source "${BASEDIR}/helper.sh"
 
 OLDBIN=$(which changelog.sh 2>/dev/null)
@@ -25,6 +26,7 @@ fi
 colorbanner ${GREEN} "Install into directory $INSTALLDIR"
 
 installFile $BASEDIR/helper.sh $INSTALLDIR
+installFile $BASEDIR/nextversion.sh $INSTALLDIR
 installFile $BASEDIR/changelog.sh $INSTALLDIR
 installFile $BASEDIR/git-changelog.ejs $INSTALLDIR
 installFile $BASEDIR/issues.js $INSTALLDIR

@@ -1,8 +1,28 @@
-= Changelog
+:toc:
+
+= Git Helper Scripts
+
+== Install
+
+This script copies all shell scripts and the needed data files into a selectable target folder. The default
+folder is where the `nextversion.sh` is found using the `which` function.
+
+== Nextversion
+
+Every project uses a version scheme which uses a version number combined by some numbers separated
+by a dot. With the `git flow release` process the next release version must be set.
+
+This script supports the user by selecting one of the next possible version number and
+start the release using `git flow command`.
+
+If wished the release can be finished immediately. Otherwise the process will continue after doing
+some changes in the release branch.
+
+== Changelog
 
 This script can be used to generate a set of html files for each commit with links to an optional issue management system and the commit itself.
 
-== Prerequisites
+=== Prerequisites
 
 This project uses a fork from https://github.com/ariatemplates/git-release-notes
 
@@ -16,7 +36,7 @@ npm install
 npm link
 ----
 
-== Installation
+=== Installation
 
 Clone this repository and install the files into a folder which can be found by the search process for executables configuration (i.e. PATH environment variable).
 
@@ -28,7 +48,7 @@ $ ./install.sh
 
 The install script uses the directory if the changelog.sh was installed before and can be found or ask the user for an foldername.
 
-== Configuration
+=== Configuration
 
 Please set the base output folder for the resulting files (default is $HOME/changelog) and optional the issue tracker URL (default is empty). The issue tracker URL contains a placeholder for the issue identifier named in the commt message which is `:id` (see Usage).
 
@@ -44,7 +64,7 @@ The given URL is used to generate the following link.
 ----
 <a target="_blank" href="issueUrl">issueId</a>
 ----
-== Usage
+=== Usage
 
 Go to the local git repository and call ```changelog.sh```. This starts an interview process to ask all values. Normally the precomputed values from the git information matches.
 
@@ -69,6 +89,53 @@ You can enter a issue tracker url which contains a placeholder `:id` for the iss
 With the first run a file `.changelog.sh` is generated, please add this to your global gitignore configuration. To rerun the process execute this file.
 
 
+== Migrate
+
+This tool migrates a CVS module to a Git repository by creating the *.git* directory. This script uses *git cvsimport*, which uses the POSIX Time zone methods.
+That means it runs under every normal Unix system and under Windows using Cygwin (not recommended due to the problem of finding the required Cygwin packages).
+For Windows 10 the WSL (Windows Subsystem for Linux) with Ubuntu is recommended.
+
+This tool also checks all the authors, therefore the user must expand the existing `authors.txt` in case there are new authors and then check in the changes.
+
+Cvsimport has problems if the name of the repository is the same as the module name, this is the reason to migrate modules only, and in nearly all cases this makes sense.
+
+After starting the process (outside the directory which contains the bash script) with
+
+----
+migrate.sh
+----
+
+the user is asked for every action and will be guided through the migration (also have helper.sh next to migrate.sh in the same folder).
+
+=== Error handling
+
+In some git packages, *cvsimport* is not installed by default. To install it in Ubuntu, type
+----
+sudo apt install git-cvs
+----
+
+=== Hints for Windows 10 users
+
+To allow `apt` with our proxy, add the following line in the `/etc/apt/apt.conf` file (if it does not exist, create it):
+----
+Acquire::http::Proxy "http://username:password@<proxy-url>:<port>";
+----
+
+The CVSROOT environmental variable needs to be set the following way (replace "username" of course):
+----
+export CVSROOT=":pserver:username@<cvs-server>:/home/cvsroot"
+----
+
+To navigate to a Windows folder in WSL, you should first navigate to `/mnt`. Thus a path like `D:\git` could be reached by
+
+----
+cd /mnt/c/git.
+----
+
+To call migrate.sh on a certain repository, after navigating to its folder you should type:
+----
+./migrate.sh
+----
 
 
 
