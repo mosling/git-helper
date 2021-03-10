@@ -52,15 +52,32 @@ colorbanner() {
 
 installFile() {
   if [ -z "$1" ] || [ -z "$2" ]; then
-    colorbanner ${RED} "installFile needs to parameter <file> <target directory>"
+	  colorbanner ${RED} "installFile needs two parameters (<file> <target directory>)"
     exit 2
   fi
 
-  changed=$(diff $1 $2 | wc -l)
-  if [[ 0 -eq $changed ]]; then
-    echo "skip $1 --> $2 (no changes found)"
+  if [ ! -f "$1" ]; then
+	  colorbanner ${RED} "the given file '$1' doesn't exists"
+	  exit 3
+  fi
+
+  if [ ! -d "$2" ]; then
+	  colorbanner ${RED} "the given install direcrory '$2' doesn't exists"
+	  exit 3
+  fi
+
+  bn=$(basename $1)
+  if [ -f "$2/$bn" ]
+  then
+    changed=$(diff $1 $2 | wc -l )
+    if [[ 0 -eq $changed ]]; then
+      echo "skip $1 --> $2 (no changes found)"
+    else
+      echo "update $1 --> $2"
+      cp $1 $2
+    fi
   else
-    echo "copy $1 --> $2 (new or updated)"
+    echo "install $1 --> $2"
     cp $1 $2
   fi
 }

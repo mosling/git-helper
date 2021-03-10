@@ -23,10 +23,16 @@ then
     chmod +x install.sh
 fi
 
-colorbanner ${GREEN} "Install into directory $INSTALLDIR"
+if [ -d "$INSTALLDIR" ]
+then
+	colorbanner ${GREEN} "Install into directory $INSTALLDIR"
 
-installFile $BASEDIR/helper.sh $INSTALLDIR
-installFile $BASEDIR/nextversion.sh $INSTALLDIR
-installFile $BASEDIR/changelog.sh $INSTALLDIR
-installFile $BASEDIR/git-changelog.ejs $INSTALLDIR
-installFile $BASEDIR/issues.js $INSTALLDIR
+	installFile $BASEDIR/helper.sh $INSTALLDIR
+	installFile $BASEDIR/nextversion.sh $INSTALLDIR
+	installFile $BASEDIR/changelog.sh $INSTALLDIR
+	installFile $BASEDIR/git-changelog.ejs $INSTALLDIR
+	installFile $BASEDIR/issues.js $INSTALLDIR
+else
+	colorbanner ${RED} "Install directory '$INSTALLDIR' doesn't exists"
+fi
+
