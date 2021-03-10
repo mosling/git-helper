@@ -152,7 +152,7 @@ if [[ "false" == "$isRelease" ]]; then
     fi
 fi
 
-if [ "stop" != "$NEXT_VERSION" ]; then
+if [ "stop" != "$NEXT_VERSION" -a "" != "$NEXTVERSION" ]; then
     if [ "false" == ${isRelease} ]; then
         colorbanner "${GREEN}" "Start Release"
         git flow release start "$NEXT_VERSION"
@@ -184,4 +184,11 @@ if [ "stop" != "$NEXT_VERSION" ]; then
             git flow release publish
         fi
     fi
+else
+	if [ "stop" == "$NEXT_VERSION" ]; then
+		colorbanner "${GREEN}" "Stopped by the User"
+	else
+		colorbanner "${RED}" "Missing Value for the Next Release."
+	fi
 fi
+
