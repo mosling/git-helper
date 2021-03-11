@@ -49,8 +49,6 @@ PROD_BRANCH=$(echo $GIT_FLOW | sed -n -e "s/.*production releases: \([^ ]*\).*/\
 if [ "" == "${PROD_BRANCH}" ]; then
     colorbanner "${RED}" "Can't find a production branch using 'git flow config'"
     exit 2
-else
-    echo -e "  ${CHECKMARK} production branch ${GREEN}${PROD_BRANCH}${NOCOLOR}"
 fi
 
 if [[ -f .gitmodules ]]; then
@@ -113,7 +111,8 @@ if [[ "false" == "$isRelease" ]]; then
         fi
     fi
 
-    echo -e "current version is: ${GREEN}$VERSION${NOCOLOR}"
+    echo -e "production branch : ${GREEN}${PROD_BRANCH}${NOCOLOR}"
+    echo -e "current version   : ${GREEN}$VERSION${NOCOLOR}"
     # shellcheck disable=SC2001
     V=$(echo $VERSION | sed -e 's/-.*//')
 
