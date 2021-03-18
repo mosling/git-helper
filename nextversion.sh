@@ -37,12 +37,18 @@ else
     echo -e "  ${CHECKMARK} git repository"
 fi
 
-git flow config >/dev/null 2>&1
-if [ "$?" == 1 ]; then
+GIT_FLOW=$(git flow config 2>/dev/null)
+if [ "$?" != 0 ]; then
     colorbanner "${RED}" "The repository must have git flow initialized, please call 'git flow init'."
     exit 2
 else
     echo -e "  ${CHECKMARK} git flow activated"
+fi
+
+PROD_BRANCH=$(echo $GIT_FLOW | sed -n -e "s/.*production releases: \([^ ]*\).*/\1/p")
+if [ "" == "${PROD_BRANCH}" ]; then
+    colorbanner "${RED}" "Can't find a production branch using 'git flow config'"
+    exit 2
 fi
 
 if [[ -f .gitmodules ]]; then
@@ -105,7 +111,8 @@ if [[ "false" == "$isRelease" ]]; then
         fi
     fi
 
-    echo -e "current version is: ${GREEN}$VERSION${NOCOLOR}"
+    echo -e "production branch : ${GREEN}${PROD_BRANCH}${NOCOLOR}"
+    echo -e "current version   : ${GREEN}$VERSION${NOCOLOR}"
     # shellcheck disable=SC2001
     V=$(echo $VERSION | sed -e 's/-.*//')
 
@@ -152,9 +159,9 @@ if [[ "false" == "$isRelease" ]]; then
     fi
 fi
 
-if [ "stop" != "$NEXT_VERSION" ]; then
+if [ "stop" != "$NEXT_VERSION" -a "" != "$NEXT_VERSION" ]; then
     if [ "false" == ${isRelease} ]; then
-        colorbanner "${GREEN}" "Start Release"
+        colorbanner "${GREEN}" "Start Release $NEXT_VERSION"
         git flow release start "$NEXT_VERSION"
     fi
 
@@ -173,7 +180,7 @@ if [ "stop" != "$NEXT_VERSION" ]; then
         fi
 
         if [ "remote" == "${MODE}" ]; then
-            updateRemoteBranch master "Publish Master with the Release Version"
+            updateRemoteBranch ${PROD_BRANCH} "Publish ${PROD_BRANCH^} with the Release Version"
             updateRemoteBranch develop "Switch Back to Develop Branch and Publish"
         fi
     elif [ "remote" == "${MODE}" ]; then
@@ -184,4 +191,11 @@ if [ "stop" != "$NEXT_VERSION" ]; then
             git flow release publish
         fi
     fi
+else
+	if [ "stop" == "$NEXT_VERSION" ]; then
+		colorbanner "${GREEN}" "Stopped by the User"
+	else
+		colorbanner "${RED}" "Missing Value for the Next Release."
+	fi
 fi
+
