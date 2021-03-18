@@ -161,7 +161,7 @@ fi
 
 if [ "stop" != "$NEXT_VERSION" -a "" != "$NEXT_VERSION" ]; then
     if [ "false" == ${isRelease} ]; then
-        colorbanner "${GREEN}" "Start Release"
+        colorbanner "${GREEN}" "Start Release $NEXT_VERSION"
         git flow release start "$NEXT_VERSION"
     fi
 
