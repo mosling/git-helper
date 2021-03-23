@@ -62,7 +62,7 @@ installFile() {
   fi
 
   if [ ! -d "$2" ]; then
-	  colorbanner ${RED} "the given install direcrory '$2' doesn't exists"
+	  colorbanner ${RED} "the given install directory '$2' doesn't exists"
 	  exit 3
   fi
 
@@ -71,13 +71,13 @@ installFile() {
   then
     changed=$(diff $1 $2 | wc -l )
     if [[ 0 -eq $changed ]]; then
-      echo "skip $1 --> $2 (no changes found)"
+      echo "unchanged $1"
     else
-      echo "update $1 --> $2"
+      echo "   update $1"
       cp $1 $2
     fi
   else
-    echo "install $1 --> $2"
+    echo "  install $1"
     cp $1 $2
   fi
 }
