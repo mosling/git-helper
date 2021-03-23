@@ -3,7 +3,7 @@
 BASEDIR=$(dirname "$0")
 # shellcheck source=./helper.sh
 source "${BASEDIR}/helper.sh"
-MODE=remote
+REMOTE_NAME=origin
 isRelease=false
 CHECKMARK="${GREEN}\u2713${NOCOLOR}"
 
@@ -18,14 +18,41 @@ updateRemoteBranch() {
     git push
 }
 
+checkOptionalRemoveBranch() {
+    TN="refs/tags/$1"
+    TAGEXISTS=$(git for-each-ref $TN | wc -l)
+    if [[ "$TAGEXISTS" -gt "0" ]]; then
+        MAIN_BRANCH=$(git branch --contains $TN | grep $PROD_BRANCH | wc -l)
+        if [[ "$MAIN_BRANCH" -eq "1" ]]; then
+            colorbanner "${RED}" "Tag $1 exists at the production branch $PROD_BRANCH -- can't proceed."
+            exit 2
+        else
+            read -rp "Remove Existing Branch '$1' [y/N] " delete_branch
+            delete_branch=${delete_branch:-N}
+            if [[ "$delete_branch" == "y" ]]; then
+                git tag -d $1
+                if [[ "$REMOTE_NAME" != "local" ]]; then
+                    git push --delete $REMOTE_NAME tagname
+                fi
+            else
+                colorbanner "${GREEN}" "Please remove/rename tag $1 and restart."
+                exit 2
+            fi
+        fi
+    fi
+}
+
 if [[ "local" == "$1" ]]; then
-    MODE=local
-    colorbanner "${GREEN}" "Local Mode -- no remote connection used."
+    REMOTE_NAME=local
+    colorbanner "${GREEN}" "Create new Release without remote connection used."
+elif [[ $# -eq 1 ]]; then
+    REMOTE_NAME=$1
+    colorbanner "${GREEN}" "Create new Release an push it to $REMOTE_NAME"
 elif [[ $# -ne 0 ]]; then
-    colorbanner "${RED}" "Please start with $0 [local] and follow the interview."
+    colorbanner "${GREEN}" "Please start with $0 [remote-name] and follow the interview.\n origin is the default remote name\nplease use local without remote connection (i.e. for testing only)"
     exit 2
 else
-    colorbanner "${GREEN}" "Create new Release from Develop Branch"
+    colorbanner "${GREEN}" "Create new Release an push it to $REMOTE_NAME"
 fi
 
 git status >/dev/null
@@ -35,6 +62,17 @@ if [ "$?" == 128 ]; then
 else
     echo "preconditions:"
     echo -e "  ${CHECKMARK} git repository"
+fi
+
+if [ "local" != "${REMOTE_NAME}" ]; then
+    ## check for existing remote connection
+    REMOTE_CONNECTION=$(git remote get-url ${REMOTE_NAME} 2>/dev/null)
+    if [ "$?" -ne "0" ]; then
+        colorbanner "${RED}" "No existing remote connection named $REMOTE_NAME --> stop."
+        exit 2
+    else
+        echo -e "  ${CHECKMARK} remote repository ${GREEN}$REMOTE_CONNECTION${NOCOLOR}"
+    fi
 fi
 
 GIT_FLOW=$(git flow config 2>/dev/null)
@@ -74,12 +112,12 @@ else
     echo -e "  ${CHECKMARK} on develop branch"
 fi
 
-if [ "remote" == "${MODE}" ]; then
+if [ "local" != "${REMOTE_NAME}" ]; then
     if [[ "false" == "$isRelease" ]]; then
         ## check for not pushed changes for develop branch only
-        ahead=$(git log --oneline origin/develop..HEAD | wc -l)
+        ahead=$(git log --oneline $REMOTE_NAME/develop..HEAD | wc -l)
         if [ "$ahead" -gt 0 ]; then
-            colorbanner "${RED}" "Your branch is ahead of 'origin/develop' by ${ahead} commit(s). --> stop."
+            colorbanner "${RED}" "Your branch is ahead of '$REMOTE_NAME/develop' by ${ahead} commit(s). --> stop."
             exit 2
         else
             echo -e "  ${CHECKMARK} all commits pushed"
@@ -91,7 +129,7 @@ if [ "remote" == "${MODE}" ]; then
         if [[ "true" == "$isRelease" ]]; then
             echo -e "  ${CHECKMARK} assume continue at local release branch"
         else
-            remoteUrl=$(git remote get-url --push origin)
+            remoteUrl=$(git remote get-url --push $REMOTE_NAME)
             colorbanner "${RED}" " Can't connect repository at '${remoteUrl}' --> stop."
             exit 2
         fi
@@ -160,6 +198,9 @@ if [[ "false" == "$isRelease" ]]; then
 fi
 
 if [ "stop" != "$NEXT_VERSION" -a "" != "$NEXT_VERSION" ]; then
+
+    checkOptionalRemoveBranch $NEXT_VERSION
+
     if [ "false" == ${isRelease} ]; then
         colorbanner "${GREEN}" "Start Release $NEXT_VERSION"
         git flow release start "$NEXT_VERSION"
@@ -179,11 +220,11 @@ if [ "stop" != "$NEXT_VERSION" -a "" != "$NEXT_VERSION" ]; then
             git flow release finish "$NEXT_VERSION"
         fi
 
-        if [ "remote" == "${MODE}" ]; then
+        if [ "local" != "${REMOTE_NAME}" ]; then
             updateRemoteBranch ${PROD_BRANCH} "Publish ${PROD_BRANCH^} with the Release Version"
             updateRemoteBranch develop "Switch Back to Develop Branch and Publish"
         fi
-    elif [ "remote" == "${MODE}" ]; then
+    elif [ "local" != "${REMOTE_NAME}" ]; then
         read -rp "Publish the Release Branch [y/N] " publishRelease
         publishRelease=${publishRelease:-N}
 
